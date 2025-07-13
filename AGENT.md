@@ -22,3 +22,7 @@
 - **Constants**: UPPER_CASE at module level (OPEN_METEO_BASE_URL, PREDEFINED_REGIONS)
 - **Class structure**: Private methods prefixed with `_`, tool handlers as async methods
 - **Testing**: pytest with anyio backend, fixtures in conftest.py, mock API responses
+
+## Commit Messages
+- **Commit message format**: <type>(<scope>): <subject>
+- **Commit message types**: feat, fix, docs, style, refactor, test, chore
