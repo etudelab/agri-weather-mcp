@@ -9,8 +9,9 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Path to the Python script
-PYTHON_SCRIPT="run_mcp_tools.py"
+# Path to the Python script (in same directory as this script)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="$SCRIPT_DIR/run_mcp_tools.py"
 
 # Function to show usage
 show_usage() {
@@ -46,9 +47,10 @@ if [ ! -f "$PYTHON_SCRIPT" ]; then
     exit 1
 fi
 
-# Check if virtual environment exists and activate it
-if [ -d ".venv" ]; then
-    source .venv/bin/activate
+# Check if virtual environment exists and activate it (from project root)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [ -d "$PROJECT_ROOT/.venv" ]; then
+    source "$PROJECT_ROOT/.venv/bin/activate"
 else
     echo -e "${YELLOW}Warning: Virtual environment not found. Attempting to run with system Python...${NC}"
 fi
@@ -59,7 +61,7 @@ if [ ! -x "$PYTHON_SCRIPT" ]; then
 fi
 
 # Build Python command with arguments
-PYTHON_CMD="./$PYTHON_SCRIPT"
+PYTHON_CMD="python $PYTHON_SCRIPT"
 
 # Parse command line arguments and pass them to the Python script
 while [[ $# -gt 0 ]]; do

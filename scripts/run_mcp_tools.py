@@ -9,14 +9,18 @@ and outputs the returned payload to files.
 import asyncio
 import json
 import os
+import sys
 import argparse
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 
+# Add parent directory to path to import weather_mcp_server
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from weather_mcp_server import WeatherMCPServer
 
-# Define default output directory
-DEFAULT_OUTPUT_DIR = "tool_outputs"
+# Define default output directory (relative to project root)
+DEFAULT_OUTPUT_DIR = "../tool_outputs"
 
 # Define default location (Jakarta, Indonesia)
 DEFAULT_LATITUDE = -6.2088
@@ -73,6 +77,11 @@ def save_to_file(data: Dict[str, Any], tool_name: str, output_dir: str) -> str:
     Returns:
         str: Path to the saved file
     """
+    # Convert relative path to absolute path from script location
+    if not os.path.isabs(output_dir):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        output_dir = os.path.join(script_dir, output_dir)
+    
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
