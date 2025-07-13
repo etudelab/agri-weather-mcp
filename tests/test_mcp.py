@@ -504,7 +504,7 @@ class TestWeatherMCPServer:
         assert result["historical_data"][0]["temperature_max"] == mock_historical_response["daily"]["temperature_2m_max"][0]
 
     @pytest.mark.anyio
-    async def test_error_handling(self, server: WeatherMCPServer):
+    async def test_error_handling(self, server: WeatherMCPServer, mock_weather_response):
         """Test error handling for invalid arguments.
         
         Verifies that the server properly handles and raises exceptions for
@@ -512,7 +512,11 @@ class TestWeatherMCPServer:
         
         Args:
             server: The WeatherMCPServer instance
+            mock_weather_response: Mock API response for weather data
         """
+        # Configure the mock API to return test data
+        server.api.forecast.return_value = mock_weather_response
+        
         # Test with missing required arguments
         with pytest.raises(KeyError) as excinfo:
             await server._get_current_weather({})

@@ -320,9 +320,14 @@ class WeatherMCPServer:
                 )
 
     def _validate_coordinates(self, lat: float, lon: float) -> bool:
-        """Validate coordinates are within the configured region bounds"""
+        """Validate coordinates are within valid global bounds and configured region bounds"""
+        # First check basic coordinate bounds
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+            return False
+            
+        # Then check region bounds if configured
         if not self.region_bounds:
-            return True  # No restriction
+            return True  # No additional regional restriction
 
         return (
             self.region_bounds["lat_min"] <= lat <= self.region_bounds["lat_max"] and
