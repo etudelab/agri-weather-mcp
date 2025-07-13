@@ -8,15 +8,15 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 class MockResponse:
     """Mock HTTP response object that mimics httpx.Response."""
-    
+
     def __init__(self, status_code: int, json_data: Dict[str, Any]):
         self.status_code = status_code
         self._json_data = json_data
-        
+
     def json(self) -> Dict[str, Any]:
         """Return the JSON data."""
         return self._json_data
-        
+
     def raise_for_status(self) -> None:
         """Raise an exception if the status code is 4xx or 5xx."""
         if 400 <= self.status_code < 600:
@@ -26,11 +26,11 @@ class MockResponse:
 def mock_api_response(response_data: Dict[str, Any], status_code: int = 200) -> AsyncMock:
     """
     Create a mock for httpx.AsyncClient.get that returns a predefined response.
-    
+
     Args:
         response_data: The JSON data to return in the response
         status_code: The HTTP status code to return (default: 200)
-        
+
     Returns:
         An AsyncMock object that can be used to patch httpx.AsyncClient.get
     """
@@ -41,42 +41,42 @@ def mock_api_response(response_data: Dict[str, Any], status_code: int = 200) -> 
 def mock_open_meteo_api(forecast_data: Dict[str, Any] = None, archive_data: Dict[str, Any] = None) -> MagicMock:
     """
     Create a mock OpenMeteoAPI instance for testing.
-    
+
     Args:
         forecast_data: Mock data for forecast() method calls
         archive_data: Mock data for archive() method calls
-        
+
     Returns:
         A MagicMock object configured to work as OpenMeteoAPI
     """
     mock_api = MagicMock()
-    
+
     # Mock async context manager behavior
     mock_api.__aenter__ = AsyncMock(return_value=mock_api)
     mock_api.__aexit__ = AsyncMock(return_value=None)
     mock_api.aclose = AsyncMock()
-    
+
     # Mock API methods
     if forecast_data:
         mock_api.forecast = AsyncMock(return_value=forecast_data)
     else:
         mock_api.forecast = AsyncMock()
-        
+
     if archive_data:
         mock_api.archive = AsyncMock(return_value=archive_data)
     else:
         mock_api.archive = AsyncMock()
-    
+
     return mock_api
 
 def mock_api_error(status_code: int = 500, error_message: str = "Server Error") -> AsyncMock:
     """
     Create a mock for httpx.AsyncClient.get that simulates an API error.
-    
+
     Args:
         status_code: The HTTP error status code to return (default: 500)
         error_message: The error message to include in the response (default: "Server Error")
-        
+
     Returns:
         An AsyncMock object that can be used to patch httpx.AsyncClient.get
     """
@@ -87,11 +87,11 @@ def mock_api_error(status_code: int = 500, error_message: str = "Server Error") 
 def api_patch(response_data: Dict[str, Any], status_code: int = 200) -> Callable:
     """
     Decorator to patch httpx.AsyncClient.get with a mock response.
-    
+
     Args:
         response_data: The JSON data to return in the response
         status_code: HTTP status code to return
-        
+
     Returns:
         A decorator function that patches httpx.AsyncClient.get
     """
@@ -141,19 +141,19 @@ def mock_httpx_get_error(status_code=500, error_message="Server Error"):
 def get_test_locations(server):
     """
     Get test locations for a server instance based on its region configuration.
-    
+
     Args:
         server: WeatherMCPServer instance
-        
+
     Returns:
         list: List of dictionaries with 'lat' and 'lon' keys for testing
     """
     if server.region_bounds is None:
         # Default test location if no region is configured
         return [{"lat": 0.0, "lon": 0.0}]
-    
+
     region_name = server.region_name.lower() if server.region_name else ''
-    
+
     # Return appropriate test locations based on region
     if region_name == 'indonesia':
         return [{"lat": -6.2088, "lon": 106.8456}]  # Jakarta
@@ -170,6 +170,6 @@ def get_test_locations(server):
             lat = (bounds['lat_min'] + bounds['lat_max']) / 2
             lon = (bounds['lon_min'] + bounds['lon_max']) / 2
             return [{"lat": lat, "lon": lon}]
-    
+
     # Fallback to a default location
     return [{"lat": 0.0, "lon": 0.0}]

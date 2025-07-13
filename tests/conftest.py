@@ -438,3 +438,83 @@ def mock_agricultural_alerts_response():
         ],
         "analysis_time": "2025-07-08T12:06:01.814321"
     }
+
+
+@pytest.fixture
+def mock_weather_data():
+    """
+    Fixture providing a complete mock weather data set that matches Open-Meteo API format.
+    
+    This combines various aspects of other mock fixtures but provides a complete dataset
+    for comprehensive testing of all weather-related functionality.
+    
+    Returns:
+        Dict[str, Any]: A dictionary with mock weather data
+    """
+    return {
+        "timezone": "Asia/Jakarta",
+        "elevation": 8,
+        "current": {
+            "time": "2024-01-15T12:00:00Z",
+            "temperature_2m": 28.5,
+            "relative_humidity_2m": 75,
+            "apparent_temperature": 32.1,
+            "precipitation": 0,
+            "weather_code": 0,
+            "cloud_cover": 25,
+            "pressure_msl": 1013.2,
+            "wind_speed_10m": 8.5,
+            "wind_direction_10m": 180,
+            "wind_gusts_10m": 12.3,
+            "soil_temperature_0cm": 26.8,
+            "soil_temperature_6cm": 25.2,
+            "soil_temperature_18cm": 24.6,
+            "soil_temperature_54cm": 23.8,
+            "soil_moisture_0_to_1cm": 0.25,
+            "soil_moisture_1_to_3cm": 0.28,
+            "soil_moisture_3_to_9cm": 0.32,
+            "soil_moisture_9_to_27cm": 0.35,
+            "soil_moisture_27_to_81cm": 0.38
+        },
+        "daily": {
+            "time": ["2024-01-15", "2024-01-16", "2024-01-17", "2024-01-18", "2024-01-19"],
+            "temperature_2m_max": [32.1, 31.8, 33.2, 29.5, 30.8],
+            "temperature_2m_min": [24.2, 23.8, 25.1, 22.9, 24.5],
+            "temperature_2m_mean": [28.1, 27.8, 29.2, 26.2, 27.7],
+            "precipitation_sum": [0.0, 2.3, 0.0, 8.5, 1.2],
+            "precipitation_probability_max": [10, 60, 20, 85, 40],
+            "wind_speed_10m_max": [12.3, 14.2, 11.8, 16.5, 13.1],
+            "wind_gusts_10m_max": [18.7, 21.5, 17.2, 24.8, 19.3],
+            "wind_direction_10m_dominant": [180, 200, 165, 220, 190],
+            "weather_code": [0, 61, 1, 63, 51],
+            "sunrise": ["2024-01-15T06:05:00", "2024-01-16T06:05:00", "2024-01-17T06:06:00", "2024-01-18T06:06:00", "2024-01-19T06:07:00"],
+            "sunset": ["2024-01-15T18:20:00", "2024-01-16T18:20:00", "2024-01-17T18:21:00", "2024-01-18T18:21:00", "2024-01-19T18:22:00"],
+            "et0_fao_evapotranspiration": [4.2, 3.8, 4.5, 3.2, 3.9]
+        },
+        "hourly": {
+            "time": [
+                "2024-01-15T00:00:00", "2024-01-15T01:00:00", "2024-01-15T02:00:00", 
+                "2024-01-15T03:00:00", "2024-01-15T04:00:00", "2024-01-15T05:00:00",
+                "2024-01-15T06:00:00", "2024-01-15T07:00:00", "2024-01-15T08:00:00",
+                "2024-01-15T09:00:00", "2024-01-15T10:00:00", "2024-01-15T11:00:00"
+            ],
+            "temperature_2m": [25.2, 24.8, 24.5, 24.2, 24.8, 25.5, 26.8, 27.9, 29.2, 30.1, 31.2, 32.1],
+            "relative_humidity_2m": [82, 84, 85, 87, 85, 83, 78, 75, 72, 68, 65, 62],
+            "precipitation": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            "weather_code": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "wind_speed_10m": [5.2, 4.8, 4.5, 4.2, 4.8, 5.5, 6.8, 7.9, 8.2, 9.1, 9.8, 10.2],
+            "soil_temperature_0cm": [24.2, 24.0, 23.8, 23.6, 23.8, 24.2, 25.1, 26.2, 27.1, 28.2, 28.8, 29.2],
+            "soil_temperature_6cm": [23.8, 23.6, 23.4, 23.2, 23.4, 23.8, 24.6, 25.2, 25.8, 26.4, 26.8, 27.2],
+            "soil_temperature_18cm": [23.2, 23.0, 22.8, 22.6, 22.8, 23.2, 23.8, 24.2, 24.6, 25.0, 25.2, 25.4],
+            "soil_temperature_54cm": [22.8, 22.6, 22.4, 22.2, 22.4, 22.8, 23.2, 23.4, 23.6, 23.8, 24.0, 24.2],
+            "soil_moisture_0_to_1cm": [0.28, 0.28, 0.27, 0.27, 0.27, 0.28, 0.28, 0.27, 0.26, 0.25, 0.24, 0.23],
+            "soil_moisture_1_to_3cm": [0.32, 0.32, 0.31, 0.31, 0.31, 0.32, 0.32, 0.31, 0.30, 0.29, 0.28, 0.27],
+            "soil_moisture_3_to_9cm": [0.35, 0.35, 0.34, 0.34, 0.34, 0.35, 0.35, 0.34, 0.33, 0.32, 0.31, 0.30],
+            "soil_moisture_9_to_27cm": [0.38, 0.38, 0.37, 0.37, 0.37, 0.38, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33],
+            "soil_moisture_27_to_81cm": [0.42, 0.42, 0.41, 0.41, 0.41, 0.42, 0.42, 0.41, 0.40, 0.39, 0.38, 0.37],
+            "evapotranspiration": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+            "et0_fao_evapotranspiration": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65],
+            "vapour_pressure_deficit": [0.2, 0.1, 0.1, 0.1, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4],
+            "shortwave_radiation": [0, 0, 0, 0, 0, 50, 150, 250, 350, 450, 550, 650]
+        }
+    }
