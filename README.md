@@ -1,4 +1,4 @@
-# Agri-Weather MCP for Indonesia
+# Agri-Weather MCP
 
 This project provides a comprehensive Weather Model Context Protocol (MCP) server specifically designed for agricultural applications. It leverages the free [Open-Meteo API](https://open-meteo.com/) to provide real-time weather data, forecasts, and agricultural intelligence to support farming operations, cultivation planning, and crop management decisions.
 
