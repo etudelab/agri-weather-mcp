@@ -1,17 +1,23 @@
 # Weather MCP Server - Agent Configuration
 
 ## Commands
+**IMPORTANT**: Always activate virtual environment first: `source .venv/bin/activate`
+
 - **Test all**: `python -m pytest` or `pytest`
 - **Test single file**: `python -m pytest test_mcp.py::TestWeatherMCPServer::test_current_weather`
-- **Run server**: `python weather_mcp_server.py`
+- **Run server**: `python main.py`
 - **Run MCP tools**: `python scripts/run_mcp_tools.py --tool <tool_name>` or `./scripts/run_mcp_tools.sh`
-- **Virtual env setup**: `./setup_venv.sh` or manually: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+- **Virtual env setup**: `./scripts/setup.sh` or manually: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 
 ## Architecture
-- **Main module**: `weather_mcp_server.py` - MCP server with 7 weather tools
-- **Test structure**: `test_mcp.py` (main tests), `conftest.py` (fixtures), `test_utils.py` (mock helpers)
+- **Package structure**: Modular design with separate API and server concerns
+  - `weather_mcp/api/open_meteo.py` - Pure HTTP transport wrapper
+  - `weather_mcp/server/weather_mcp_server.py` - MCP server with 7 weather tools
+  - `main.py` - Entry point script
+- **Test structure**: `tests/` directory with organized test files
+  - `tests/test_mcp.py` (main tests), `tests/conftest.py` (fixtures), `tests/test_utils.py` (mock helpers)
 - **API integration**: Open-Meteo weather API (forecast and archive endpoints)
-- **Framework**: MCP (Model Context Protocol) with async support using httpx
+- **Framework**: MCP (Model Context Protocol) with dependency injection for testability
 - **Regional support**: Predefined regions (Indonesia, South East Asia, Australia, India) with coordinate validation
 
 ## Code Style
