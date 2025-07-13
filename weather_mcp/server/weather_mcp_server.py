@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Union, Optional
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from weather_mcp.api.open_meteo import OpenMeteoAPI
+from ..api.open_meteo import OpenMeteoAPI
 from mcp.server.models import InitializationOptions
 from mcp.types import (
     CallToolRequest,

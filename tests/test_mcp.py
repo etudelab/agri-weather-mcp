@@ -7,7 +7,7 @@ import sys
 from unittest.mock import patch, AsyncMock
 import pytest
 import anyio
-from weather_mcp_server import WeatherMCPServer, PREDEFINED_REGIONS
+from weather_mcp.server.weather_mcp_server import WeatherMCPServer, PREDEFINED_REGIONS
 from test_utils import get_test_locations
 
 # Constants for test data
