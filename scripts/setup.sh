@@ -1,5 +1,6 @@
 #!/bin/bash
 # Script to set up a clean virtual environment and install dependencies
+# Note: This script must be run from the root directory of the repository
 
 # Colors for output
 GREEN='\033[0;32m'

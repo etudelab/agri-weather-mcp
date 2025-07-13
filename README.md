@@ -26,19 +26,19 @@ This project provides a comprehensive Weather Model Context Protocol (MCP) serve
     cd agri-weather-mcp
     ```
 
-2.  **Run the setup script:**
+2.  **Run the setup script (from repository root):**
     ```bash
-    ./setup_venv.sh
+    ./scripts/setup.sh
     ```
 
 ### Alternative Setup
 
 1.  **Create and activate a Python virtual environment:**
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate
+    python3 -m venv .venv
+    source .venv/bin/activate
     ```
-    *On Windows, use `venv\Scripts\activate`*
+    *On Windows, use `.venv\Scripts\activate`*
 
 2.  **Install the required dependencies:**
     ```bash

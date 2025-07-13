@@ -7,7 +7,7 @@
 - **Test single file**: `python -m pytest test_mcp.py::TestWeatherMCPServer::test_current_weather`
 - **Run server**: `python main.py`
 - **Run MCP tools**: `python scripts/run_mcp_tools.py --tool <tool_name>` or `./scripts/run_mcp_tools.sh`
-- **Virtual env setup**: `./setup_venv.sh` or manually: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+- **Virtual env setup**: `./scripts/setup.sh` or manually: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 
 ## Architecture
 - **Package structure**: Modular design with separate API and server concerns
