@@ -21,8 +21,10 @@ weather_mcp/
 
 ## Current Status
 - ✅ **Phase 1 Complete**: Created API wrapper class and directory structure
-- 🔄 **Phase 2 In Progress**: Refactoring WeatherMCPServer to use wrapper
-- 📋 **Next**: Update WeatherMCPServer constructor and method calls
+- ✅ **Phase 2 Complete**: Refactored WeatherMCPServer to use API wrapper
+- ✅ **Phase 3 Complete**: Updated tests to work with new architecture
+- 🔄 **Phase 4 In Progress**: Cleanup & Documentation
+- 📋 **Next**: Update documentation and finalize refactor
 
 ## Todo Checklist
 
@@ -35,20 +37,20 @@ weather_mcp/
   - [x] Add proper error handling and logging
   - [x] Include async context manager support
 
-### Phase 2: Refactor WeatherMCPServer
-- [ ] Update `WeatherMCPServer.__init__()` to accept `OpenMeteoAPI` instance
-- [ ] Remove `_make_api_request()` method
-- [ ] Replace direct HTTP calls with API wrapper calls
-- [ ] Update forecast methods to use `api.forecast()`
-- [ ] Update historical methods to use `api.archive()`
-- [ ] Remove unused imports (`httpx`, `urlencode`)
-- [ ] Add proper shutdown handling for API wrapper
+### Phase 2: Refactor WeatherMCPServer ✅
+- [x] Update `WeatherMCPServer.__init__()` to accept `OpenMeteoAPI` instance
+- [x] Remove `_make_api_request()` method
+- [x] Replace direct HTTP calls with API wrapper calls
+- [x] Update forecast methods to use `api.forecast()`
+- [x] Update historical methods to use `api.archive()`
+- [x] Remove unused imports (`httpx`, `urlencode`)
+- [x] Add proper shutdown handling for API wrapper
 
-### Phase 3: Update Tests
-- [ ] Update test fixtures to mock `OpenMeteoAPI`
-- [ ] Refactor existing tests to work with new architecture
-- [ ] Add unit tests for `OpenMeteoAPI` class
-- [ ] Ensure all existing functionality still works
+### Phase 3: Update Tests ✅
+- [x] Update test fixtures to mock `OpenMeteoAPI`
+- [x] Refactor existing tests to work with new architecture
+- [x] Add unit tests for `OpenMeteoAPI` class
+- [x] Ensure all existing functionality still works
 
 ### Phase 4: Cleanup & Documentation
 - [ ] Update README.md with new architecture

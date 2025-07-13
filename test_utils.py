@@ -4,7 +4,7 @@ Test utilities for mocking external API calls and other testing helpers.
 import json
 from typing import Dict, Any, Callable
 from functools import wraps
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 class MockResponse:
     """Mock HTTP response object that mimics httpx.Response."""
@@ -37,6 +37,37 @@ def mock_api_response(response_data: Dict[str, Any], status_code: int = 200) -> 
     mock = AsyncMock()
     mock.return_value = MockResponse(status_code, response_data)
     return mock
+
+def mock_open_meteo_api(forecast_data: Dict[str, Any] = None, archive_data: Dict[str, Any] = None) -> MagicMock:
+    """
+    Create a mock OpenMeteoAPI instance for testing.
+    
+    Args:
+        forecast_data: Mock data for forecast() method calls
+        archive_data: Mock data for archive() method calls
+        
+    Returns:
+        A MagicMock object configured to work as OpenMeteoAPI
+    """
+    mock_api = MagicMock()
+    
+    # Mock async context manager behavior
+    mock_api.__aenter__ = AsyncMock(return_value=mock_api)
+    mock_api.__aexit__ = AsyncMock(return_value=None)
+    mock_api.aclose = AsyncMock()
+    
+    # Mock API methods
+    if forecast_data:
+        mock_api.forecast = AsyncMock(return_value=forecast_data)
+    else:
+        mock_api.forecast = AsyncMock()
+        
+    if archive_data:
+        mock_api.archive = AsyncMock(return_value=archive_data)
+    else:
+        mock_api.archive = AsyncMock()
+    
+    return mock_api
 
 def mock_api_error(status_code: int = 500, error_message: str = "Server Error") -> AsyncMock:
     """

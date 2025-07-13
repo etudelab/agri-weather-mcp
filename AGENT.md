@@ -1,6 +1,8 @@
 # Weather MCP Server - Agent Configuration
 
 ## Commands
+**IMPORTANT**: Always activate virtual environment first: `source .venv/bin/activate`
+
 - **Test all**: `python -m pytest` or `pytest`
 - **Test single file**: `python -m pytest test_mcp.py::TestWeatherMCPServer::test_current_weather`
 - **Run server**: `python weather_mcp_server.py`

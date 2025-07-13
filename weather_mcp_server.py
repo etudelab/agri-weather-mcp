@@ -11,11 +11,10 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Union
-from urllib.parse import urlencode
-
-import httpx
+from typing import Any, Dict, List, Union, Optional
 from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from weather_mcp.api.open_meteo import OpenMeteoAPI
 from mcp.server.models import InitializationOptions
 from mcp.types import (
     CallToolRequest,
@@ -34,8 +33,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Constants
-OPEN_METEO_BASE_URL = "https://api.open-meteo.com/v1"
-OPEN_METEO_ARCHIVE_URL = "https://archive-api.open-meteo.com/v1"
 PREDEFINED_REGIONS = {
     "indonesia": {
         "lat_min": -11.0, "lat_max": 6.0,
@@ -58,9 +55,13 @@ PREDEFINED_REGIONS = {
 class WeatherMCPServer:
     """Main Weather MCP Server class"""
 
-    def __init__(self, region: Union[str, Dict[str, float], None] = "indonesia"):
+    def __init__(
+        self, 
+        region: Union[str, Dict[str, float], None] = "indonesia",
+        api: Optional[OpenMeteoAPI] = None
+    ):
         self.server = Server("weather-mcp")
-        self.http_client = httpx.AsyncClient(timeout=30.0)
+        self.api = api or OpenMeteoAPI()
         self._configure_region(region)
         self._setup_tools()
 
@@ -328,20 +329,7 @@ class WeatherMCPServer:
             self.region_bounds["lon_min"] <= lon <= self.region_bounds["lon_max"]
         )
 
-    async def _make_api_request(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Make request to Open-Meteo API"""
-        url = f"{OPEN_METEO_BASE_URL}/{endpoint}"
 
-        try:
-            response = await self.http_client.get(url, params=params)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error calling Open-Meteo API: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Error calling Open-Meteo API: {e}")
-            raise
 
     async def _get_current_weather(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Get current weather conditions"""
@@ -374,7 +362,7 @@ class WeatherMCPServer:
             "timezone": "auto"
         }
 
-        data = await self._make_api_request("forecast", params)
+        data = await self.api.forecast(params)
 
         # Process and enhance the data
         current = data.get("current", {})
@@ -452,7 +440,7 @@ class WeatherMCPServer:
         if include_hourly:
             params["hourly"] = ",".join(hourly_params)
 
-        data = await self._make_api_request("forecast", params)
+        data = await self.api.forecast(params)
 
         result = {
             "location": {
@@ -694,7 +682,7 @@ class WeatherMCPServer:
             "timezone": "auto"
         }
 
-        data = await self._make_api_request("forecast", params)
+        data = await self.api.forecast(params)
 
         result = {
             "location": {
@@ -762,7 +750,7 @@ class WeatherMCPServer:
             "timezone": "auto"
         }
 
-        data = await self._make_api_request("forecast", params)
+        data = await self.api.forecast(params)
 
         result = {
             "location": {
@@ -833,13 +821,7 @@ class WeatherMCPServer:
             "models": "era5"
         }
 
-        try:
-            response = await self.http_client.get(OPEN_METEO_ARCHIVE_URL, params=params)
-            response.raise_for_status()
-            data = response.json()
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error calling Open-Meteo API: {e}")
-            raise
+        data = await self.api.archive(params)
 
         result = {
             "location": {
@@ -882,19 +864,20 @@ class WeatherMCPServer:
 
     async def run(self):
         """Run the MCP server"""
-        async with stdio_server() as (read_stream, write_stream):
-            await self.server.run(
-                read_stream,
-                write_stream,
-                InitializationOptions(
-                    server_name="weather-mcp",
-                    server_version="1.0.0",
-                    capabilities=self.server.get_capabilities(
-                        notification_options=None,
-                        experimental_capabilities=None,
+        async with self.api:
+            async with stdio_server() as (read_stream, write_stream):
+                await self.server.run(
+                    read_stream,
+                    write_stream,
+                    InitializationOptions(
+                        server_name="weather-mcp",
+                        server_version="1.0.0",
+                        capabilities=self.server.get_capabilities(
+                            notification_options=None,
+                            experimental_capabilities=None,
+                        ),
                     ),
-                ),
-            )
+                )
 
 async def main():
     """Main entry point"""

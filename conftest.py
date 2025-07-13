@@ -35,7 +35,10 @@ def region_config(request):
 @pytest.fixture
 def server(region_config):
     """Pytest fixture to create a WeatherMCPServer instance for a given region."""
-    return WeatherMCPServer(region=region_config)
+    from test_utils import mock_open_meteo_api
+    # Create server with mocked API to avoid real HTTP calls
+    mock_api = mock_open_meteo_api()
+    return WeatherMCPServer(region=region_config, api=mock_api)
 
 @pytest.fixture
 def mock_weather_response():

@@ -8,7 +8,7 @@ from unittest.mock import patch, AsyncMock
 import pytest
 import anyio
 from weather_mcp_server import WeatherMCPServer, PREDEFINED_REGIONS
-from test_utils import get_test_locations, mock_api_response, mock_api_error, api_patch, get_test_locations
+from test_utils import get_test_locations
 
 # Constants for test data
 TEST_CROP_TYPE = "rice"
@@ -75,32 +75,34 @@ class TestWeatherMCPServer:
             server: The WeatherMCPServer instance
             mock_weather_response: Mock API response for weather data
         """
-        with patch('httpx.AsyncClient.get', mock_api_response(mock_weather_response)):
-            location = get_test_locations(server)[0]
-            args = {"latitude": location["lat"], "longitude": location["lon"]}
-            result = await server._get_current_weather(args)
-            
-            # Verify response structure
-            assert "location" in result, "Response missing 'location' field"
-            assert "current_time" in result, "Response missing 'current_time' field"
-            assert "weather" in result, "Response missing 'weather' field"
-            assert "soil" in result, "Response missing 'soil' field"
-            
-            # Verify location structure
-            self._assert_location_structure(result["location"])
-            
-            # Verify weather data
-            weather = result["weather"]
-            assert isinstance(weather, dict), "Weather data should be a dictionary"
-            assert "temperature" in weather, "Weather missing temperature data"
-            assert weather["temperature"] == mock_weather_response["weather"]["temperature"], "Temperature mismatch"
-            
-            # Verify soil data - nested structure
-            soil = result["soil"]
-            assert isinstance(soil, dict), "Soil data should be a dictionary"
-            assert "temperature" in soil, "Soil missing temperature data"
-            assert "moisture" in soil, "Soil missing moisture data"
-            assert soil["temperature"]["surface"] == mock_weather_response["soil"]["temperature"]["surface"], "Soil temperature mismatch"
+        # Configure the mock API to return test data
+        server.api.forecast.return_value = mock_weather_response
+        
+        location = get_test_locations(server)[0]
+        args = {"latitude": location["lat"], "longitude": location["lon"]}
+        result = await server._get_current_weather(args)
+        
+        # Verify response structure
+        assert "location" in result, "Response missing 'location' field"
+        assert "current_time" in result, "Response missing 'current_time' field"
+        assert "weather" in result, "Response missing 'weather' field"
+        assert "soil" in result, "Response missing 'soil' field"
+        
+        # Verify location structure
+        self._assert_location_structure(result["location"])
+        
+        # Verify weather data
+        weather = result["weather"]
+        assert isinstance(weather, dict), "Weather data should be a dictionary"
+        assert "temperature" in weather, "Weather missing temperature data"
+        assert weather["temperature"] == mock_weather_response["weather"]["temperature"], "Temperature mismatch"
+        
+        # Verify soil data - nested structure
+        soil = result["soil"]
+        assert isinstance(soil, dict), "Soil data should be a dictionary"
+        assert "temperature" in soil, "Soil missing temperature data"
+        assert "moisture" in soil, "Soil missing moisture data"
+        assert soil["temperature"]["surface"] == mock_weather_response["soil"]["temperature"]["surface"], "Soil temperature mismatch"
 
     @pytest.mark.anyio
     async def test_weather_forecast(self, server: WeatherMCPServer, mock_forecast_response):
@@ -113,39 +115,41 @@ class TestWeatherMCPServer:
             server: The WeatherMCPServer instance
             mock_forecast_response: Mock API response for forecast data
         """
-        with patch('httpx.AsyncClient.get', mock_api_response(mock_forecast_response)):
-            location = get_test_locations(server)[0]
-            forecast_days = 3
-            args = {
-                "latitude": location["lat"], 
-                "longitude": location["lon"], 
-                "days": forecast_days
-            }
-            result = await server._get_weather_forecast(args)
-            
-            # Verify response structure
-            assert "location" in result, "Response missing 'location' field"
-            assert "forecast_days" in result, "Response missing 'forecast_days' field"
-            assert "daily_forecast" in result, "Response missing 'daily_forecast' field"
-            
-            # Verify location structure
-            self._assert_location_structure(result["location"])
-            
-            # Verify forecast data
-            assert result["forecast_days"] == forecast_days, "Forecast days mismatch"
-            assert isinstance(result["daily_forecast"], list), "Daily forecast should be a list"
-            assert len(result["daily_forecast"]) == forecast_days, f"Expected {forecast_days} days of forecast data"
-            
-            # Verify forecast data structure
-            for day in result["daily_forecast"]:
-                assert "date" in day, "Forecast day missing date"
-                assert "temperature_max" in day, "Forecast day missing max temperature"
-                assert "temperature_min" in day, "Forecast day missing min temperature"
-            
-            # Verify the forecast data matches our mock
-            for i, day in enumerate(result["daily_forecast"]):
-                assert day["date"] == mock_forecast_response["daily"]["time"][i]
-                assert day["temperature_max"] == mock_forecast_response["daily"]["temperature_2m_max"][i]
+        # Configure the mock API to return test data
+        server.api.forecast.return_value = mock_forecast_response
+        
+        location = get_test_locations(server)[0]
+        forecast_days = 3
+        args = {
+            "latitude": location["lat"], 
+            "longitude": location["lon"], 
+            "days": forecast_days
+        }
+        result = await server._get_weather_forecast(args)
+        
+        # Verify response structure
+        assert "location" in result, "Response missing 'location' field"
+        assert "forecast_days" in result, "Response missing 'forecast_days' field"
+        assert "daily_forecast" in result, "Response missing 'daily_forecast' field"
+        
+        # Verify location structure
+        self._assert_location_structure(result["location"])
+        
+        # Verify forecast data
+        assert result["forecast_days"] == forecast_days, "Forecast days mismatch"
+        assert isinstance(result["daily_forecast"], list), "Daily forecast should be a list"
+        assert len(result["daily_forecast"]) == forecast_days, f"Expected {forecast_days} days of forecast data"
+        
+        # Verify forecast data structure
+        for day in result["daily_forecast"]:
+            assert "date" in day, "Forecast day missing date"
+            assert "temperature_max" in day, "Forecast day missing max temperature"
+            assert "temperature_min" in day, "Forecast day missing min temperature"
+        
+        # Verify the forecast data matches our mock
+        for i, day in enumerate(result["daily_forecast"]):
+            assert day["date"] == mock_forecast_response["daily"]["time"][i]
+            assert day["temperature_max"] == mock_forecast_response["daily"]["temperature_2m_max"][i]
 
     @pytest.mark.anyio
     async def test_agricultural_alerts(self, server: WeatherMCPServer, mock_weather_response, mock_forecast_response):
@@ -384,41 +388,43 @@ class TestWeatherMCPServer:
             server: The WeatherMCPServer instance
             mock_soil_response: Mock API response for soil data
         """
-        with patch('httpx.AsyncClient.get', mock_api_response(mock_soil_response)):
-            location = get_test_locations(server)[0]
-            args = {"latitude": location["lat"], "longitude": location["lon"]}
-            result = await server._get_soil_conditions(args)
-            
-            # Verify response structure
-            assert "location" in result, "Response missing 'location' field"
-            assert "soil_conditions" in result, "Response missing 'soil_conditions' field"
-            
-            # Verify location structure
-            self._assert_location_structure(result["location"])
-            
-            # Verify soil data structure
-            soil_conditions = result["soil_conditions"]
-            assert isinstance(soil_conditions, list), "Soil conditions should be a list"
-            assert len(soil_conditions) > 0, "Soil conditions list should not be empty"
-            
-            # Check first soil condition entry
-            first_condition = soil_conditions[0]
-            assert "time" in first_condition, "Soil condition entry missing time"
-            assert "temperature" in first_condition, "Soil condition entry missing temperature"
-            assert "moisture" in first_condition, "Soil condition entry missing moisture"
-            # Verify temperature data structure in first condition
-            temp = first_condition["temperature"]
-            assert isinstance(temp, dict), "Soil temperature should be a dictionary"
-            assert "surface" in temp, "Soil temperature missing surface data"
-            
-            # Verify moisture data structure in first condition
-            moisture = first_condition["moisture"]
-            assert isinstance(moisture, dict), "Soil moisture should be a dictionary"
-            assert "0_1cm" in moisture, "Soil moisture missing 0-1cm data"
-            
-            # Verify the nested structure for soil temperature and moisture matches mock data
-            assert first_condition["temperature"]["surface"] == mock_soil_response["hourly"]["soil_temperature_0cm"][0], "Soil surface temperature mismatch"
-            assert first_condition["moisture"]["0_1cm"] == mock_soil_response["hourly"]["soil_moisture_0_to_1cm"][0], "Soil moisture mismatch"
+        # Configure the mock API to return test data
+        server.api.forecast.return_value = mock_soil_response
+        
+        location = get_test_locations(server)[0]
+        args = {"latitude": location["lat"], "longitude": location["lon"]}
+        result = await server._get_soil_conditions(args)
+        
+        # Verify response structure
+        assert "location" in result, "Response missing 'location' field"
+        assert "soil_conditions" in result, "Response missing 'soil_conditions' field"
+        
+        # Verify location structure
+        self._assert_location_structure(result["location"])
+        
+        # Verify soil data structure
+        soil_conditions = result["soil_conditions"]
+        assert isinstance(soil_conditions, list), "Soil conditions should be a list"
+        assert len(soil_conditions) > 0, "Soil conditions list should not be empty"
+        
+        # Check first soil condition entry
+        first_condition = soil_conditions[0]
+        assert "time" in first_condition, "Soil condition entry missing time"
+        assert "temperature" in first_condition, "Soil condition entry missing temperature"
+        assert "moisture" in first_condition, "Soil condition entry missing moisture"
+        # Verify temperature data structure in first condition
+        temp = first_condition["temperature"]
+        assert isinstance(temp, dict), "Soil temperature should be a dictionary"
+        assert "surface" in temp, "Soil temperature missing surface data"
+        
+        # Verify moisture data structure in first condition
+        moisture = first_condition["moisture"]
+        assert isinstance(moisture, dict), "Soil moisture should be a dictionary"
+        assert "0_1cm" in moisture, "Soil moisture missing 0-1cm data"
+        
+        # Verify the nested structure for soil temperature and moisture matches mock data
+        assert first_condition["temperature"]["surface"] == mock_soil_response["hourly"]["soil_temperature_0cm"][0], "Soil surface temperature mismatch"
+        assert first_condition["moisture"]["0_1cm"] == mock_soil_response["hourly"]["soil_moisture_0_to_1cm"][0], "Soil moisture mismatch"
 
     @pytest.mark.anyio
     async def test_evapotranspiration_data(self, server: WeatherMCPServer, mock_et_response):
@@ -431,20 +437,22 @@ class TestWeatherMCPServer:
             server: The WeatherMCPServer instance
             mock_et_response: Mock API response for evapotranspiration data
         """
-        with patch('httpx.AsyncClient.get', mock_api_response(mock_et_response)):
-            location = get_test_locations(server)[0]
-            forecast_days = 5
-            args = {"latitude": location["lat"], "longitude": location["lon"], "days": forecast_days}
-            result = await server._get_evapotranspiration_data(args)
-            
-            assert "location" in result
-            assert "daily_et" in result
-            assert len(result["daily_et"]) == 5
-            
-            # Verify ET data matches our mock
-            for i, day in enumerate(result["daily_et"]):
-                assert day["date"] == mock_et_response["daily"]["time"][i]
-                assert day["et0_fao"] == mock_et_response["daily"]["et0_fao_evapotranspiration"][i]
+        # Configure the mock API to return test data
+        server.api.forecast.return_value = mock_et_response
+        
+        location = get_test_locations(server)[0]
+        forecast_days = 5
+        args = {"latitude": location["lat"], "longitude": location["lon"], "days": forecast_days}
+        result = await server._get_evapotranspiration_data(args)
+        
+        assert "location" in result
+        assert "daily_et" in result
+        assert len(result["daily_et"]) == 5
+        
+        # Verify ET data matches our mock
+        for i, day in enumerate(result["daily_et"]):
+            assert day["date"] == mock_et_response["daily"]["time"][i]
+            assert day["et0_fao"] == mock_et_response["daily"]["et0_fao_evapotranspiration"][i]
 
     @pytest.mark.anyio
     async def test_historical_weather(self, server: WeatherMCPServer, mock_historical_response):
@@ -457,41 +465,43 @@ class TestWeatherMCPServer:
             server: The WeatherMCPServer instance
             mock_historical_response: Mock API response for historical weather data
         """
-        with patch('httpx.AsyncClient.get', mock_api_response(mock_historical_response)):
-            location = get_test_locations(server)[0]
-            end_date = datetime.now() - timedelta(days=30)
-            start_date = end_date - timedelta(days=7)
-            args = {
-                "latitude": location["lat"],
-                "longitude": location["lon"],
-                "start_date": start_date.strftime("%Y-%m-%d"),
-                "end_date": end_date.strftime("%Y-%m-%d")
-            }
-            result = await server._get_historical_weather(args)
-            
-            # Verify response structure
-            assert "location" in result, "Response missing 'location' field"
-            assert "historical_data" in result, "Response missing 'historical_data' field"
-            
-            # Verify location structure
-            self._assert_location_structure(result["location"])
-            
-            # Verify historical data
-            historical_data = result["historical_data"]
-            assert isinstance(historical_data, list), "Historical data should be a list"
-            assert len(historical_data) > 0, "Historical data list is empty"
-            
-            # Verify data structure of first historical entry
-            if historical_data:
-                day = historical_data[0]
-                assert "date" in day, "Historical day missing date field"
-                assert "temperature_max" in day, "Historical day missing max temperature"
-                assert "temperature_min" in day, "Historical day missing min temperature"
-                assert "precipitation" in day, "Historical day missing precipitation data"
-            
-            # Verify historical data matches our mock
-            assert result["historical_data"][0]["date"] == mock_historical_response["daily"]["time"][0]
-            assert result["historical_data"][0]["temperature_max"] == mock_historical_response["daily"]["temperature_2m_max"][0]
+        # Configure the mock API to return test data
+        server.api.archive.return_value = mock_historical_response
+        
+        location = get_test_locations(server)[0]
+        end_date = datetime.now() - timedelta(days=30)
+        start_date = end_date - timedelta(days=7)
+        args = {
+            "latitude": location["lat"],
+            "longitude": location["lon"],
+            "start_date": start_date.strftime("%Y-%m-%d"),
+            "end_date": end_date.strftime("%Y-%m-%d")
+        }
+        result = await server._get_historical_weather(args)
+        
+        # Verify response structure
+        assert "location" in result, "Response missing 'location' field"
+        assert "historical_data" in result, "Response missing 'historical_data' field"
+        
+        # Verify location structure
+        self._assert_location_structure(result["location"])
+        
+        # Verify historical data
+        historical_data = result["historical_data"]
+        assert isinstance(historical_data, list), "Historical data should be a list"
+        assert len(historical_data) > 0, "Historical data list is empty"
+        
+        # Verify data structure of first historical entry
+        if historical_data:
+            day = historical_data[0]
+            assert "date" in day, "Historical day missing date field"
+            assert "temperature_max" in day, "Historical day missing max temperature"
+            assert "temperature_min" in day, "Historical day missing min temperature"
+            assert "precipitation" in day, "Historical day missing precipitation data"
+        
+        # Verify historical data matches our mock
+        assert result["historical_data"][0]["date"] == mock_historical_response["daily"]["time"][0]
+        assert result["historical_data"][0]["temperature_max"] == mock_historical_response["daily"]["temperature_2m_max"][0]
 
     @pytest.mark.anyio
     async def test_error_handling(self, server: WeatherMCPServer):
@@ -529,17 +539,21 @@ class TestWeatherMCPServer:
         # Test with API error
         error_code = 500
         error_message = "Internal Server Error"
-        with patch('httpx.AsyncClient.get', mock_api_error(status_code=error_code, error_message=error_message)):
-            location = get_test_locations(server)[0]
-            args = {"latitude": location["lat"], "longitude": location["lon"]}
+        
+        # Configure the mock API to raise an error
+        from unittest.mock import AsyncMock
+        server.api.forecast = AsyncMock(side_effect=RuntimeError(f"Open-Meteo API request failed: HTTP Error: {error_code}"))
+        
+        location = get_test_locations(server)[0]
+        args = {"latitude": location["lat"], "longitude": location["lon"]}
+        
+        with pytest.raises(Exception) as excinfo:
+            await server._get_current_weather(args)
             
-            with pytest.raises(Exception) as excinfo:
-                await server._get_current_weather(args)
-                
-            # Verify error message contains status code and/or error message
-            error_str = str(excinfo.value).lower()
-            assert str(error_code) in error_str or "error" in error_str, \
-                "Exception should mention the API error status code or error message"
+        # Verify error message contains status code and/or error message
+        error_str = str(excinfo.value).lower()
+        assert str(error_code) in error_str or "error" in error_str, \
+            "Exception should mention the API error status code or error message"
 
 # Test for invalid region configuration
 def test_invalid_region_config():
