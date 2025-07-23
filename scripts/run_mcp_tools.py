@@ -17,7 +17,7 @@ from typing import Dict, Any, List, Optional
 # Add parent directory to path to import weather_mcp_server
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from weather_mcp_server import WeatherMCPServer
+from weather_mcp.server.weather_mcp_server_fastmcp import WeatherMCPServer
 
 # Define default output directory (relative to project root)
 DEFAULT_OUTPUT_DIR = "../tool_outputs"

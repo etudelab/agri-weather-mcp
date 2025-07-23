@@ -5,7 +5,7 @@ import asyncio
 import pytest
 from typing import Dict, Any, List, Union
 
-from weather_mcp.server.weather_mcp_server import WeatherMCPServer, PREDEFINED_REGIONS
+from weather_mcp.server.weather_mcp_server_fastmcp import WeatherMCPServer, PREDEFINED_REGIONS
 
 # Test configurations for different regions
 TEST_CONFIGS = [

@@ -47,9 +47,39 @@ This project provides a comprehensive Weather Model Context Protocol (MCP) serve
 
 ## Usage
 
+### Running the Server
+
+To run the Agri-Weather server, execute the following command from the project's root directory:
+
+```bash
+python main.py
+```
+
+The server will start and listen for requests on standard input/output.
+
+#### Configuration
+
+You can specify a geographical region to restrict weather data using the `--region` command-line argument. This is useful for focusing the server's scope on a specific area of interest.
+
+**Example:**
+
+```bash
+python main.py --region south_east_asia
+```
+
+**Supported Regions:**
+
+*   `indonesia` (default)
+*   `south_east_asia`
+*   `australia`
+*   `india`
+*   `none` (no regional restriction)
+
+If you need to define a custom region, you can do so by modifying the `PREDEFINED_REGIONS` dictionary in `weather_mcp/server/weather_mcp_server_fastmcp.py`.
+
 ### Running the Test Suite
 
-The project includes a comprehensive test suite that verifies all functionality of the MCP server.
+The project includes a comprehensive test suite that verifies all functionality of the Agri-Weather server.
 
 To run the tests, execute the following command from the project's root directory:
 
@@ -67,17 +97,7 @@ This will run all tests using both the asyncio and trio backends to ensure compa
 - **Async Testing**: Compatible with both asyncio and trio backends
 - **Robust Error Handling**: Tests for proper handling of API errors and invalid inputs
 
-#### Test Structure
-
-The test suite is organized as follows:
-
-- `test_mcp.py`: Contains the main test classes and methods
-- `conftest.py`: Contains pytest fixtures and mock data
-- `pytest.ini`: Contains pytest configuration
-
-The tests serve as practical examples of how to interact with the server's capabilities.
-
-## MCP Tools Overview
+## Tools Overview
 
 The server exposes the following tools through the Model Context Protocol:
 
